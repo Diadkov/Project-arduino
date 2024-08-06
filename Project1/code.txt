@@ -1,0 +1,36 @@
+const int bPin = 2;  // Button pin
+const int lPin = 13;  // LED pin
+
+bool bState = LOW;    // Current button state
+bool lState = LOW;    // LED state
+bool lastB = LOW;     // Previous button state
+
+unsigned long lastDb = 0;    // Last time the button state changed
+const unsigned long dbDly = 50;  // Debounce delay
+
+void setup() {
+  pinMode(bPin, INPUT);      // Set button pin as input
+  pinMode(lPin, OUTPUT);     // Set LED pin as output
+  digitalWrite(lPin, lState); // Initialize LED state
+}
+
+void loop() {
+  bool currB = digitalRead(bPin);  // Read current button state
+
+  if (currB != lastB) {          // Check if button state has changed
+    lastDb = millis();          // Update the last debounce time
+  }
+
+  if (millis() - lastDb > dbDly) { // Check if debounce delay has passed
+    if (currB != bState) {       // Check if button state has changed after debounce
+      bState = currB;           // Update button state
+
+      if (bState == HIGH) {     // If button is pressed
+        lState = !lState;       // Toggle LED state
+        digitalWrite(lPin, lState); // Update LED state
+      }
+    }
+  }
+
+  lastB = currB; // Update previous button state
+}

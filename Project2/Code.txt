@@ -1,0 +1,28 @@
+const int lPin = 11; // Pin for LED
+
+int bri = 0;        // Brightness level (0 to 255)
+int fadeR = 5;      // Fade rate
+unsigned long lastT = 0; // Last update time
+const unsigned long fadeI = 20; // Fade interval 2 * (255 / fadeR) * fadeI мс
+
+void setup() {
+  pinMode(lPin, OUTPUT); // Set LED pin as output
+}
+
+void loop() {
+  unsigned long cT = millis(); // Current time
+  
+  // Check if it's time to update the LED brightness
+  if (cT - lastT >= fadeI) {
+    lastT = cT;
+    
+    bri += fadeR; // Update brightness level
+
+    // Reverse the direction of fading at the ends
+    if (bri <= 0 || bri >= 255) {
+      fadeR = -fadeR; // Reverse the fade direction
+    }
+    
+    analogWrite(lPin, bri); // Apply PWM to LED
+  }
+}
