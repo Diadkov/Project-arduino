@@ -1,0 +1,63 @@
+const int bPin = 2;  // Button pin
+const int lPin = 11; // LED pin
+
+bool bState = LOW;    // Current button state
+bool lState = LOW;    // LED state
+bool lastB = LOW;     // Previous button state
+
+unsigned long lastDb = 0;        // Last time the button state changed
+const unsigned long dbDly = 50;  // Debounce delay
+
+int bri = 0;        // Brightness level (0 to 255)
+int fadeR = 1;      // Fade rate
+unsigned long lastT = 0;         // Last update time
+const unsigned long fadeI = 4;   // Fade interval (in milliseconds)
+
+void setup() {
+  pinMode(bPin, INPUT);      // Set button pin as input
+  pinMode(lPin, OUTPUT);     // Set LED pin as output
+  digitalWrite(lPin, lState); // Initialize LED state
+}
+
+void loop() {
+  // Button debounce logic
+  bool currB = digitalRead(bPin);  // Read current button state
+
+  if (currB != lastB) {            // Check if button state has changed
+    lastDb = millis();             // Update the last debounce time
+  }
+
+  if (millis() - lastDb > dbDly) { // Check if debounce delay has passed
+    if (currB != bState) {         // Check if button state has changed after debounce
+      bState = currB;              // Update button state
+
+      if (bState == HIGH) {        // If button is pressed
+        lState = !lState;          // Toggle LED state
+      }
+    }
+  }
+
+  lastB = currB; // Update previous button state
+
+  // LED fade logic
+  if (lState) { // Only fade when the LED is toggled on
+    unsigned long cT = millis();
+    
+    // Check if it's time to update
+    if (cT - lastT >= fadeI) {
+      lastT = cT;
+      
+      bri += fadeR; // Update brightness level
+
+      // Reverse the direction 
+      if (bri <= 0 || bri >= 255) {
+        fadeR = -fadeR;
+      }
+      
+      analogWrite(lPin, bri); // Apply PWM to LED
+    }
+  } else {
+    analogWrite(lPin, 0); // Ensure LED is off when not in fade state
+  }
+}
+ 
